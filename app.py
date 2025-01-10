@@ -4,9 +4,15 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 from io import BytesIO
 from datetime import datetime
+from docx import Document
+
+# Function to extract text from a Word document
+def extract_text_from_docx(file):
+    doc = Document(file)
+    return "\n".join([para.text for para in doc.paragraphs])
 
 # Function to create the PDF
-def create_pdf(candidate_name, years_experience, recent_position, key_skills, notes):
+def create_pdf(candidate_name, years_experience, recent_position, key_skills, education, certifications, achievements, notes):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer)
     styles = getSampleStyleSheet()
@@ -33,6 +39,28 @@ def create_pdf(candidate_name, years_experience, recent_position, key_skills, no
         skills_list = [skill.strip() for skill in key_skills.split(",")]
         for skill in skills_list:
             elements.append(Paragraph(f"- {skill}", styles["Normal"]))
+        elements.append(Spacer(1, 12))
+
+    # Education Section
+    if education:
+        elements.append(Paragraph("<b>Education:</b>", styles["h2"]))
+        elements.append(Paragraph(education, styles["Normal"]))
+        elements.append(Spacer(1, 12))
+
+    # Certifications Section
+    if certifications:
+        elements.append(Paragraph("<b>Certifications:</b>", styles["h2"]))
+        cert_list = [cert.strip() for cert in certifications.split(",")]
+        for cert in cert_list:
+            elements.append(Paragraph(f"- {cert}", styles["Normal"]))
+        elements.append(Spacer(1, 12))
+
+    # Achievements Section
+    if achievements:
+        elements.append(Paragraph("<b>Achievements:</b>", styles["h2"]))
+        ach_list = [ach.strip() for ach in achievements.split(",")]
+        for ach in ach_list:
+            elements.append(Paragraph(f"- {ach}", styles["Normal"]))
         elements.append(Spacer(1, 12))
 
     # Additional Notes Section
@@ -63,16 +91,44 @@ def main():
 
     st.title("Candidate One-Pager Generator")
     
-    # Input fields for candidate details
-    candidate_name = st.text_input("Candidate Name")
+    # Upload CV to extract text
+    uploaded_file = st.file_uploader("Upload Candidate CV (Word Document)", type=["docx"])
+    
+    extracted_text = ""
+    
+    if uploaded_file is not None:
+        extracted_text = extract_text_from_docx(uploaded_file)
+        st.success("CV uploaded successfully! Extracted text is available below.")
+    
+    # Input fields for candidate details (some pre-filled from CV text)
+    candidate_name = st.text_input("Candidate Name", value="")
+    
     years_experience = st.number_input("Years of Experience", min_value=0, step=1)
-    recent_position = st.text_input("Most Recent Position")
-    key_skills = st.text_area("Key Skills (comma-separated)")
-    notes = st.text_area("Additional Notes")
+    
+    recent_position = st.text_input("Most Recent Position", value="")
+    
+    key_skills = st.text_area("Key Skills (comma-separated)", value="")
+    
+    education = st.text_area("Education", value="")
+    
+    certifications = st.text_area("Certifications (comma-separated)", value="")
+    
+    achievements = st.text_area("Achievements (comma-separated)", value="")
+    
+    notes = st.text_area("Additional Notes", value="")
 
     if st.button("Generate PDF"):
         if candidate_name and recent_position:
-            pdf_buffer = create_pdf(candidate_name, years_experience, recent_position, key_skills, notes)
+            pdf_buffer = create_pdf(
+                candidate_name,
+                years_experience,
+                recent_position,
+                key_skills,
+                education,
+                certifications,
+                achievements,
+                notes,
+            )
 
             # Provide download link for the PDF
             st.download_button(
