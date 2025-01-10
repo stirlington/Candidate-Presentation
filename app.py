@@ -1,5 +1,5 @@
 import streamlit as st
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 from io import BytesIO
@@ -17,11 +17,6 @@ def create_pdf(candidate_name, years_experience, recent_position, key_skills, no
 
     # Elements for the PDF
     elements = []
-
-    # Add logo
-    logo_path = "STIRLING-TRANSPARENT.jpg"  # Ensure the logo is in the same directory
-    elements.append(Image(logo_path, width=150, height=50))
-    elements.append(Spacer(1, 12))
 
     # Title Section
     elements.append(Paragraph(f"Candidate Overview: {candidate_name}", header_style))
@@ -66,8 +61,6 @@ def create_pdf(candidate_name, years_experience, recent_position, key_skills, no
 def main():
     st.set_page_config(page_title="Candidate One-Pager Generator", page_icon=":briefcase:")
 
-    # Custom branding: Title and logo
-    st.image("STIRLING-TRANSPARENT.jpg", width=200)
     st.title("Candidate One-Pager Generator")
     
     # Input fields for candidate details
